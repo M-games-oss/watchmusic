@@ -1,0 +1,43 @@
+workflows:
+  watchmusic-unsigned:
+    name: WatchMusic - Unsigned Build (free sideload)
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      xcode: latest
+      vars:
+        XCODE_PROJECT: "WatchMusic.xcodeproj"
+        XCODE_SCHEME: "WatchMusic"
+    scripts:
+      - name: Install XcodeGen
+        script: |
+          brew install xcodegen
+      - name: Generate Xcode project from project.yml
+        script: |
+          cd $CM_BUILD_DIR
+          xcodegen generate
+      - name: Build unsigned .app (embeds the Watch app automatically)
+        script: |
+          cd $CM_BUILD_DIR
+          xcodebuild \
+            -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -sdk iphoneos \
+            -configuration Release \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            build
+      - name: Package as unsigned IPA
+        script: |
+          cd $CM_BUILD_DIR
+          APP_PATH="build/Build/Products/Release-iphoneos/WatchMusic.app"
+          mkdir -p Payload
+          cp -R "$APP_PATH" Payload/
+          zip -r WatchMusic-unsigned.ipa Payload
+    artifacts:
+      - "*.ipa"
+      - build/Build/Products/Release-iphoneos/*.app
+    publishing:
+      email:
+        recipients: []

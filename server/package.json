@@ -1,0 +1,15 @@
+{
+  "name": "watchmusic-server",
+  "version": "1.0.0",
+  "description": "Local yt-dlp backed server for the WatchMusic watchOS app",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "express-basic-auth": "^1.2.1",
+    "dotenv": "^16.4.5"
+  }
+}
