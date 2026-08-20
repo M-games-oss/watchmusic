@@ -22,8 +22,8 @@ workflows:
           xcodebuild \
             -project "$XCODE_PROJECT" \
             -scheme "$XCODE_SCHEME" \
-            -sdk iphoneos \
             -configuration Release \
+            -destination "generic/platform=iOS" \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
@@ -31,10 +31,21 @@ workflows:
       - name: Package as unsigned IPA
         script: |
           cd $CM_BUILD_DIR
-          APP_PATH="build/Build/Products/Release-iphoneos/WatchMusic.app"
+          APP_PATH=$(find build/Build/Products -maxdepth 2 -name "WatchMusic.app" -not -path "*simulator*" | head -n 1)
+          if [ -z "$APP_PATH" ]; then
+            echo "ERROR: could not find WatchMusic.app in the build output."
+            echo "Contents of build/Build/Products:"
+            find build/Build/Products -maxdepth 3
+            exit 1
+          fi
+          echo "Found built app at: $APP_PATH"
+          rm -rf Payload
           mkdir -p Payload
           cp -R "$APP_PATH" Payload/
           zip -r WatchMusic-unsigned.ipa Payload
+          echo "IPA contents:"
+          unzip -l WatchMusic-unsigned.ipa
+          ls -la WatchMusic-unsigned.ipa
     artifacts:
       - "*.ipa"
       - build/Build/Products/Release-iphoneos/*.app
