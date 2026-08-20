@@ -38,6 +38,3 @@ workflows:
     artifacts:
       - "*.ipa"
       - build/Build/Products/Release-iphoneos/*.app
-    publishing:
-      email:
-        recipients: []
