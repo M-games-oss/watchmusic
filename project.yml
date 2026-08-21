@@ -43,7 +43,7 @@ targets:
       path: WatchMusicWatch/Info.plist
       properties:
         WKApplication: true
-        WKRunsIndependentlyOfCompanionApp: true
+        WKRunsIndependentlyOfCompanionApp: false
         WKCompanionAppBundleIdentifier: com.amr.watchmusic
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
