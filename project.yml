@@ -4,6 +4,12 @@ options:
   deploymentTarget:
     iOS: "17.0"
     watchOS: "10.0"
+  # Xcode 26 requires the watch app embed phase to target PlugIns/ (dstSubfolderSpec 13,
+  # empty dstPath) instead of the Watch/ folder (dstSubfolderSpec 16) that XcodeGen still
+  # generates by default. Without this patch the app won't validate/install on Xcode 26.
+  # See https://github.com/yonaskolb/XcodeGen/issues/1613
+  postGenCommand: >
+    sed -i '' -e 's|dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";|dstPath = "";|' -e 's|dstSubfolderSpec = 16;|dstSubfolderSpec = 13;|' WatchMusic.xcodeproj/project.pbxproj
 
 targets:
   WatchMusic:
@@ -24,13 +30,9 @@ targets:
         MARKETING_VERSION: "1.0"
         CURRENT_PROJECT_VERSION: "1"
         TARGETED_DEVICE_FAMILY: "1"
-    # NOTE: no explicit `dependencies:` block here. XcodeGen auto-detects
-    # WatchMusicWatch as the companion watch app (via its
-    # WKCompanionAppBundleIdentifier) and generates the embed phase itself.
-    # Adding an explicit `dependencies: - target: WatchMusicWatch embed: true`
-    # on top of that causes XcodeGen to emit the embed copy phase TWICE,
-    # which is exactly the "Multiple commands produce ... CopyAndPreserveArchs"
-    # archive error. See https://github.com/yonaskolb/XcodeGen/issues/1257
+    dependencies:
+      - target: WatchMusicWatch
+        embed: true
 
   WatchMusicWatch:
     type: application.watchapp2
@@ -51,4 +53,11 @@ targets:
         MARKETING_VERSION: "1.0"
         CURRENT_PROJECT_VERSION: "1"
         TARGETED_DEVICE_FAMILY: "4"
-        SKIP_INSTALL: false
+        # Must be true: this target is embedded into WatchMusic.app via the
+        # `dependencies: embed: true` above. Leaving SKIP_INSTALL false makes
+        # Xcode ALSO treat it as its own top-level archive product, and both
+        # paths try to produce the same binary output -> "Multiple commands
+        # produce ... Applications/WatchMusicWatch.app/WatchMusicWatch".
+        # WKRunsIndependentlyOfCompanionApp (already set above) is what
+        # actually controls runtime independence, not this setting.
+        SKIP_INSTALL: true
