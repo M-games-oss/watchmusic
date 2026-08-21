@@ -35,7 +35,7 @@ targets:
         embed: true
 
   WatchMusicWatch:
-    type: application.watchapp2
+    type: application
     platform: watchOS
     sources:
       - path: WatchMusicWatch
@@ -43,7 +43,7 @@ targets:
       path: WatchMusicWatch/Info.plist
       properties:
         WKApplication: true
-        WKRunsIndependentlyOfCompanionApp: false
+        WKRunsIndependentlyOfCompanionApp: true
         WKCompanionAppBundleIdentifier: com.amr.watchmusic
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
@@ -53,11 +53,4 @@ targets:
         MARKETING_VERSION: "1.0"
         CURRENT_PROJECT_VERSION: "1"
         TARGETED_DEVICE_FAMILY: "4"
-        # Must be true: this target is embedded into WatchMusic.app via the
-        # `dependencies: embed: true` above. Leaving SKIP_INSTALL false makes
-        # Xcode ALSO treat it as its own top-level archive product, and both
-        # paths try to produce the same binary output -> "Multiple commands
-        # produce ... Applications/WatchMusicWatch.app/WatchMusicWatch".
-        # WKRunsIndependentlyOfCompanionApp (already set above) is what
-        # actually controls runtime independence, not this setting.
-        SKIP_INSTALL: true
+        SKIP_INSTALL: false
